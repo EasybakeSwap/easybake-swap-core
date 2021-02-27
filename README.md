@@ -17,3 +17,6 @@ The following assumes the use of `node@>=10`.
 ## Run Tests
 
 `yarn test`
+
+## Deployed Contracts
+EasyBakeFactory.sol (Rinkeby): 0xb169d388cdf04d1c1b93e58d8a82221ce2fd3fea
