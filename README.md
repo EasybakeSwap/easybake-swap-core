@@ -1,8 +1,6 @@
-# Pancake Factory
+# EasyBake Factory
 
-[![Actions Status](https://github.com/pancakeswap/pancake-swap-core/workflows/CI/badge.svg)](https://github.com/pancakeswap/pancake-swap-core/actions)
-
-In-depth documentation on PancakeSwap is available at [docs.pancakeswap.finance](https://docs.pancakeswap.finance/).
+In-depth documentation on EasyBakeSwap is available at [docs.easybakeswap.finance](https://docs.easybakeswap.finance/).
 
 # Local Development
 

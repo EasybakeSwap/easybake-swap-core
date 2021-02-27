@@ -1,10 +1,10 @@
 pragma solidity =0.5.16;
 
-import './interfaces/IPancakeFactory.sol';
-import './PancakePair.sol';
+import './interfaces/IEasyBakeFactory.sol';
+import './EasyBakePair.sol';
 
-contract PancakeFactory is IPancakeFactory {
-    bytes32 public constant INIT_CODE_PAIR_HASH = keccak256(abi.encodePacked(type(PancakePair).creationCode));
+contract EasyBakeFactory is IEasyBakeFactory {
+    bytes32 public constant INIT_CODE_PAIR_HASH = keccak256(abi.encodePacked(type(EasyBakePair).creationCode));
 
     address public feeTo;
     address public feeToSetter;
@@ -23,16 +23,16 @@ contract PancakeFactory is IPancakeFactory {
     }
 
     function createPair(address tokenA, address tokenB) external returns (address pair) {
-        require(tokenA != tokenB, 'Pancake: IDENTICAL_ADDRESSES');
+        require(tokenA != tokenB, 'EasyBake: IDENTICAL_ADDRESSES');
         (address token0, address token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
-        require(token0 != address(0), 'Pancake: ZERO_ADDRESS');
-        require(getPair[token0][token1] == address(0), 'Pancake: PAIR_EXISTS'); // single check is sufficient
-        bytes memory bytecode = type(PancakePair).creationCode;
+        require(token0 != address(0), 'EasyBake: ZERO_ADDRESS');
+        require(getPair[token0][token1] == address(0), 'EasyBake: PAIR_EXISTS'); // single check is sufficient
+        bytes memory bytecode = type(EasyBakePair).creationCode;
         bytes32 salt = keccak256(abi.encodePacked(token0, token1));
         assembly {
             pair := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
-        IPancakePair(pair).initialize(token0, token1);
+        IEasyBakePair(pair).initialize(token0, token1);
         getPair[token0][token1] = pair;
         getPair[token1][token0] = pair; // populate mapping in the reverse direction
         allPairs.push(pair);
@@ -40,12 +40,12 @@ contract PancakeFactory is IPancakeFactory {
     }
 
     function setFeeTo(address _feeTo) external {
-        require(msg.sender == feeToSetter, 'Pancake: FORBIDDEN');
+        require(msg.sender == feeToSetter, 'EasyBake: FORBIDDEN');
         feeTo = _feeTo;
     }
 
     function setFeeToSetter(address _feeToSetter) external {
-        require(msg.sender == feeToSetter, 'Pancake: FORBIDDEN');
+        require(msg.sender == feeToSetter, 'EasyBake: FORBIDDEN');
         feeToSetter = _feeToSetter;
     }
 }
