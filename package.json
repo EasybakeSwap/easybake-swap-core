@@ -1,7 +1,7 @@
 {
   "name": "easybake-swap-core",
   "description": "🎛 Core contracts for the EasyBake protocol",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "homepage": "https://easybakeswap.finance",
   "repository": {
     "type": "git",
@@ -27,7 +27,6 @@
     "test": "mocha",
     "prepublishOnly": "yarn test",
     "flatten:factory": "truffle-flattener contracts/EasyBakeFactory.sol > flats//EasyBakeFactory_flat.sol "
-
   },
   "devDependencies": {
     "@types/chai": "^4.2.6",
