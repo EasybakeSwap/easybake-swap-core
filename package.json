@@ -1,7 +1,7 @@
 {
   "name": "easybake-swap-core",
   "description": "🎛 Core contracts for the EasyBake protocol",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "homepage": "https://easybakeswap.finance",
   "repository": {
     "type": "git",
@@ -37,15 +37,16 @@
     "mocha": "^6.2.2",
     "prettier": "^1.19.1",
     "rimraf": "^3.0.0",
-    "solc": "0.5.16",
+    "solc": "^0.6.12",
     "truffle-plugin-verify": "^0.4.0",
     "ts-node": "^8.5.4",
     "typescript": "^3.7.3"
   },
   "license": "GPL-3.0-or-later",
   "dependencies": {
-    "truffle": "^5.1.41",
+    "truffle": "^5.2.6",
     "truffle-flattener": "^1.4.4",
-    "truffle-hdwallet-provider": "^1.0.17"
+    "truffle-hdwallet-provider": "^1.0.17",
+    "truffle-verify": "^1.0.8"
   }
 }

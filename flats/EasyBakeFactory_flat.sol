@@ -1,5 +1,7 @@
 // File: contracts/interfaces/IEasyBakeFactory.sol
 
+// SPDX-License-Identifier: MIT
+
 pragma solidity >=0.5.0;
 
 interface IEasyBakeFactory {
@@ -7,6 +9,7 @@ interface IEasyBakeFactory {
 
     function feeTo() external view returns (address);
     function feeToSetter() external view returns (address);
+    function migrator() external view returns (address);
 
     function getPair(address tokenA, address tokenB) external view returns (address pair);
     function allPairs(uint) external view returns (address pair);
@@ -16,87 +19,7 @@ interface IEasyBakeFactory {
 
     function setFeeTo(address) external;
     function setFeeToSetter(address) external;
-}
-
-// File: contracts/interfaces/IEasyBakePair.sol
-
-pragma solidity >=0.5.0;
-
-interface IEasyBakePair {
-    event Approval(address indexed owner, address indexed spender, uint value);
-    event Transfer(address indexed from, address indexed to, uint value);
-
-    function name() external pure returns (string memory);
-    function symbol() external pure returns (string memory);
-    function decimals() external pure returns (uint8);
-    function totalSupply() external view returns (uint);
-    function balanceOf(address owner) external view returns (uint);
-    function allowance(address owner, address spender) external view returns (uint);
-
-    function approve(address spender, uint value) external returns (bool);
-    function transfer(address to, uint value) external returns (bool);
-    function transferFrom(address from, address to, uint value) external returns (bool);
-
-    function DOMAIN_SEPARATOR() external view returns (bytes32);
-    function PERMIT_TYPEHASH() external pure returns (bytes32);
-    function nonces(address owner) external view returns (uint);
-
-    function permit(address owner, address spender, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s) external;
-
-    event Mint(address indexed sender, uint amount0, uint amount1);
-    event Burn(address indexed sender, uint amount0, uint amount1, address indexed to);
-    event Swap(
-        address indexed sender,
-        uint amount0In,
-        uint amount1In,
-        uint amount0Out,
-        uint amount1Out,
-        address indexed to
-    );
-    event Sync(uint112 reserve0, uint112 reserve1);
-
-    function MINIMUM_LIQUIDITY() external pure returns (uint);
-    function factory() external view returns (address);
-    function token0() external view returns (address);
-    function token1() external view returns (address);
-    function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast);
-    function price0CumulativeLast() external view returns (uint);
-    function price1CumulativeLast() external view returns (uint);
-    function kLast() external view returns (uint);
-
-    function mint(address to) external returns (uint liquidity);
-    function burn(address to) external returns (uint amount0, uint amount1);
-    function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external;
-    function skim(address to) external;
-    function sync() external;
-
-    function initialize(address, address) external;
-}
-
-// File: contracts/interfaces/IEasyBakeERC20.sol
-
-pragma solidity >=0.5.0;
-
-interface IEasyBakeERC20 {
-    event Approval(address indexed owner, address indexed spender, uint value);
-    event Transfer(address indexed from, address indexed to, uint value);
-
-    function name() external pure returns (string memory);
-    function symbol() external pure returns (string memory);
-    function decimals() external pure returns (uint8);
-    function totalSupply() external view returns (uint);
-    function balanceOf(address owner) external view returns (uint);
-    function allowance(address owner, address spender) external view returns (uint);
-
-    function approve(address spender, uint value) external returns (bool);
-    function transfer(address to, uint value) external returns (bool);
-    function transferFrom(address from, address to, uint value) external returns (bool);
-
-    function DOMAIN_SEPARATOR() external view returns (bytes32);
-    function PERMIT_TYPEHASH() external pure returns (bytes32);
-    function nonces(address owner) external view returns (uint);
-
-    function permit(address owner, address spender, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s) external;
+    function setMigrator(address) external;
 }
 
 // File: contracts/libraries/SafeMath.sol
@@ -121,13 +44,15 @@ library SafeMath {
 
 // File: contracts/EasyBakeERC20.sol
 
-pragma solidity >=0.5.16;
+// SPDX-License-Identifier: MIT
+pragma solidity >=0.6.12;
 
-contract EasyBakeERC20 is IEasyBakeERC20 {
+
+contract EasyBakeERC20 {
     using SafeMath for uint;
 
-    string public constant name = 'EasyBake LP';
-    string public constant symbol = 'DOUGH-LP';
+    string public constant name = 'DOUGH-LP';
+    string public constant symbol = 'DLP';
     uint8 public constant decimals = 18;
     uint  public totalSupply;
     mapping(address => uint) public balanceOf;
@@ -144,7 +69,7 @@ contract EasyBakeERC20 is IEasyBakeERC20 {
     constructor() public {
         uint chainId;
         assembly {
-            chainId := chainid
+            chainId := chainid()
         }
         DOMAIN_SEPARATOR = keccak256(
             abi.encode(
@@ -292,7 +217,9 @@ interface IEasyBakeCallee {
 
 // File: contracts/EasyBakePair.sol
 
-pragma solidity >=0.5.16;
+// SPDX-License-Identifier: MIT
+
+pragma solidity >=0.6.12;
 
 
 
@@ -301,7 +228,12 @@ pragma solidity >=0.5.16;
 
 
 
-contract EasyBakePair is IEasyBakePair, EasyBakeERC20 {
+interface IMigrator {
+    // Return the desired amount of liquidity token that the migrator wants.
+    function desiredLiquidity() external view returns (uint256);
+}
+
+contract EasyBakePair is EasyBakeERC20 {
     using SafeMath  for uint;
     using UQ112x112 for uint224;
 
@@ -389,7 +321,7 @@ contract EasyBakePair is IEasyBakePair, EasyBakeERC20 {
                 uint rootKLast = Math.sqrt(_kLast);
                 if (rootK > rootKLast) {
                     uint numerator = totalSupply.mul(rootK.sub(rootKLast));
-                    uint denominator = rootK.mul(3).add(rootKLast);
+                    uint denominator = rootK.mul(5).add(rootKLast);
                     uint liquidity = numerator / denominator;
                     if (liquidity > 0) _mint(feeTo, liquidity);
                 }
@@ -410,8 +342,15 @@ contract EasyBakePair is IEasyBakePair, EasyBakeERC20 {
         bool feeOn = _mintFee(_reserve0, _reserve1);
         uint _totalSupply = totalSupply; // gas savings, must be defined here since totalSupply can update in _mintFee
         if (_totalSupply == 0) {
-            liquidity = Math.sqrt(amount0.mul(amount1)).sub(MINIMUM_LIQUIDITY);
-           _mint(address(0), MINIMUM_LIQUIDITY); // permanently lock the first MINIMUM_LIQUIDITY tokens
+            address migrator = IEasyBakeFactory(factory).migrator();
+            if (msg.sender == migrator) {
+                liquidity = IMigrator(migrator).desiredLiquidity();
+                require(liquidity > 0 && liquidity != uint256(-1), "Bad desired liquidity");
+            } else {
+                require(migrator == address(0), "Must not have migrator");
+                liquidity = Math.sqrt(amount0.mul(amount1)).sub(MINIMUM_LIQUIDITY);
+                _mint(address(0), MINIMUM_LIQUIDITY); // permanently lock the first MINIMUM_LIQUIDITY tokens
+            }
         } else {
             liquidity = Math.min(amount0.mul(_totalSupply) / _reserve0, amount1.mul(_totalSupply) / _reserve1);
         }
@@ -470,8 +409,8 @@ contract EasyBakePair is IEasyBakePair, EasyBakeERC20 {
         uint amount1In = balance1 > _reserve1 - amount1Out ? balance1 - (_reserve1 - amount1Out) : 0;
         require(amount0In > 0 || amount1In > 0, 'EasyBake: INSUFFICIENT_INPUT_AMOUNT');
         { // scope for reserve{0,1}Adjusted, avoids stack too deep errors
-        uint balance0Adjusted = balance0.mul(1000).sub(amount0In.mul(2));
-        uint balance1Adjusted = balance1.mul(1000).sub(amount1In.mul(2));
+        uint balance0Adjusted = balance0.mul(1000).sub(amount0In.mul(3));
+        uint balance1Adjusted = balance1.mul(1000).sub(amount1In.mul(3));
         require(balance0Adjusted.mul(balance1Adjusted) >= uint(_reserve0).mul(_reserve1).mul(1000**2), 'EasyBake: K');
         }
 
@@ -495,18 +434,17 @@ contract EasyBakePair is IEasyBakePair, EasyBakeERC20 {
 
 // File: contracts/EasyBakeFactory.sol
 
-pragma solidity >=0.5.16;
+pragma solidity >=0.6.12;
 
 
 
 contract EasyBakeFactory is IEasyBakeFactory {
-    bytes32 public constant INIT_CODE_PAIR_HASH = keccak256(abi.encodePacked(type(EasyBakePair).creationCode));
+    address public override feeTo;
+    address public override feeToSetter;
+    address public override migrator;
 
-    address public feeTo;
-    address public feeToSetter;
-
-    mapping(address => mapping(address => address)) public getPair;
-    address[] public allPairs;
+    mapping(address => mapping(address => address)) public override getPair;
+    address[] public override allPairs;
 
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
 
@@ -514,11 +452,15 @@ contract EasyBakeFactory is IEasyBakeFactory {
         feeToSetter = _feeToSetter;
     }
 
-    function allPairsLength() external view returns (uint) {
+    function allPairsLength() external override view returns (uint) {
         return allPairs.length;
     }
 
-    function createPair(address tokenA, address tokenB) external returns (address pair) {
+    function pairCodeHash() external pure returns (bytes32) {
+        return keccak256(type(EasyBakePair).creationCode);
+    }
+
+    function createPair(address tokenA, address tokenB) external override returns (address pair) {
         require(tokenA != tokenB, 'EasyBake: IDENTICAL_ADDRESSES');
         (address token0, address token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
         require(token0 != address(0), 'EasyBake: ZERO_ADDRESS');
@@ -528,20 +470,26 @@ contract EasyBakeFactory is IEasyBakeFactory {
         assembly {
             pair := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
-        IEasyBakePair(pair).initialize(token0, token1);
+        EasyBakePair(pair).initialize(token0, token1);
         getPair[token0][token1] = pair;
         getPair[token1][token0] = pair; // populate mapping in the reverse direction
         allPairs.push(pair);
         emit PairCreated(token0, token1, pair, allPairs.length);
     }
 
-    function setFeeTo(address _feeTo) external {
+    function setFeeTo(address _feeTo) external override {
         require(msg.sender == feeToSetter, 'EasyBake: FORBIDDEN');
         feeTo = _feeTo;
     }
 
-    function setFeeToSetter(address _feeToSetter) external {
+    function setMigrator(address _migrator) external override {
+        require(msg.sender == feeToSetter, 'EasyBake: FORBIDDEN');
+        migrator = _migrator;
+    }
+
+    function setFeeToSetter(address _feeToSetter) external override {
         require(msg.sender == feeToSetter, 'EasyBake: FORBIDDEN');
         feeToSetter = _feeToSetter;
     }
+
 }

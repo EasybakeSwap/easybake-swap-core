@@ -1,6 +1,7 @@
-pragma solidity >=0.5.16;
+// SPDX-License-Identifier: MIT
 
-import './interfaces/IEasyBakePair.sol';
+pragma solidity >=0.6.12;
+
 import './EasyBakeERC20.sol';
 import './libraries/Math.sol';
 import './libraries/UQ112x112.sol';
@@ -8,7 +9,13 @@ import './interfaces/IERC20.sol';
 import './interfaces/IEasyBakeFactory.sol';
 import './interfaces/IEasyBakeCallee.sol';
 
-contract EasyBakePair is IEasyBakePair, EasyBakeERC20 {
+
+interface IMigrator {
+    // Return the desired amount of liquidity token that the migrator wants.
+    function desiredLiquidity() external view returns (uint256);
+}
+
+contract EasyBakePair is EasyBakeERC20 {
     using SafeMath  for uint;
     using UQ112x112 for uint224;
 
@@ -96,7 +103,7 @@ contract EasyBakePair is IEasyBakePair, EasyBakeERC20 {
                 uint rootKLast = Math.sqrt(_kLast);
                 if (rootK > rootKLast) {
                     uint numerator = totalSupply.mul(rootK.sub(rootKLast));
-                    uint denominator = rootK.mul(3).add(rootKLast);
+                    uint denominator = rootK.mul(5).add(rootKLast);
                     uint liquidity = numerator / denominator;
                     if (liquidity > 0) _mint(feeTo, liquidity);
                 }
@@ -117,8 +124,15 @@ contract EasyBakePair is IEasyBakePair, EasyBakeERC20 {
         bool feeOn = _mintFee(_reserve0, _reserve1);
         uint _totalSupply = totalSupply; // gas savings, must be defined here since totalSupply can update in _mintFee
         if (_totalSupply == 0) {
-            liquidity = Math.sqrt(amount0.mul(amount1)).sub(MINIMUM_LIQUIDITY);
-           _mint(address(0), MINIMUM_LIQUIDITY); // permanently lock the first MINIMUM_LIQUIDITY tokens
+            address migrator = IEasyBakeFactory(factory).migrator();
+            if (msg.sender == migrator) {
+                liquidity = IMigrator(migrator).desiredLiquidity();
+                require(liquidity > 0 && liquidity != uint256(-1), "Bad desired liquidity");
+            } else {
+                require(migrator == address(0), "Must not have migrator");
+                liquidity = Math.sqrt(amount0.mul(amount1)).sub(MINIMUM_LIQUIDITY);
+                _mint(address(0), MINIMUM_LIQUIDITY); // permanently lock the first MINIMUM_LIQUIDITY tokens
+            }
         } else {
             liquidity = Math.min(amount0.mul(_totalSupply) / _reserve0, amount1.mul(_totalSupply) / _reserve1);
         }
@@ -177,8 +191,8 @@ contract EasyBakePair is IEasyBakePair, EasyBakeERC20 {
         uint amount1In = balance1 > _reserve1 - amount1Out ? balance1 - (_reserve1 - amount1Out) : 0;
         require(amount0In > 0 || amount1In > 0, 'EasyBake: INSUFFICIENT_INPUT_AMOUNT');
         { // scope for reserve{0,1}Adjusted, avoids stack too deep errors
-        uint balance0Adjusted = balance0.mul(1000).sub(amount0In.mul(2));
-        uint balance1Adjusted = balance1.mul(1000).sub(amount1In.mul(2));
+        uint balance0Adjusted = balance0.mul(1000).sub(amount0In.mul(3));
+        uint balance1Adjusted = balance1.mul(1000).sub(amount1In.mul(3));
         require(balance0Adjusted.mul(balance1Adjusted) >= uint(_reserve0).mul(_reserve1).mul(1000**2), 'EasyBake: K');
         }
 
