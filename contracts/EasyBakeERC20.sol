@@ -1,5 +1,5 @@
 
-pragma solidity =0.5.16;
+pragma solidity >=0.5.16;
 
 import './interfaces/IEasyBakeERC20.sol';
 import './libraries/SafeMath.sol';

@@ -123,8 +123,6 @@ library SafeMath {
 
 pragma solidity >=0.5.16;
 
-
-
 contract EasyBakeERC20 is IEasyBakeERC20 {
     using SafeMath for uint;
 
