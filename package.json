@@ -1,7 +1,7 @@
 {
   "name": "easybake-swap-core",
   "description": "🎛 Core contracts for the EasyBake protocol",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "homepage": "https://easybakeswap.finance",
   "repository": {
     "type": "git",

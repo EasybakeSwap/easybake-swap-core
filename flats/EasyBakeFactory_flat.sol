@@ -24,6 +24,8 @@ interface IEasyBakeFactory {
 
 // File: contracts/libraries/SafeMath.sol
 
+// SPDX-License-Identifier: MIT
+
 pragma solidity >=0.5.16;
 
 // a library for performing overflow-safe math, courtesy of DappHub (https://github.com/dapphub/ds-math)
@@ -45,6 +47,7 @@ library SafeMath {
 // File: contracts/EasyBakeERC20.sol
 
 // SPDX-License-Identifier: MIT
+
 pragma solidity >=0.6.12;
 
 
@@ -140,6 +143,8 @@ contract EasyBakeERC20 {
 
 // File: contracts/libraries/Math.sol
 
+// SPDX-License-Identifier: MIT
+
 pragma solidity >=0.5.16;
 
 // a library for performing various math operations
@@ -166,6 +171,8 @@ library Math {
 
 // File: contracts/libraries/UQ112x112.sol
 
+// SPDX-License-Identifier: MIT
+
 pragma solidity >=0.5.16;
 
 // a library for handling binary fixed point numbers (https://en.wikipedia.org/wiki/Q_(number_format))
@@ -189,6 +196,8 @@ library UQ112x112 {
 
 // File: contracts/interfaces/IERC20.sol
 
+// SPDX-License-Identifier: MIT
+
 pragma solidity >=0.5.0;
 
 interface IERC20 {
@@ -208,6 +217,8 @@ interface IERC20 {
 }
 
 // File: contracts/interfaces/IEasyBakeCallee.sol
+
+// SPDX-License-Identifier: MIT
 
 pragma solidity >=0.5.0;
 
@@ -433,6 +444,8 @@ contract EasyBakePair is EasyBakeERC20 {
 }
 
 // File: contracts/EasyBakeFactory.sol
+
+// SPDX-License-Identifier: MIT
 
 pragma solidity >=0.6.12;
 
