@@ -26,7 +26,9 @@
     "pretest": "yarn compile",
     "test": "mocha",
     "prepublishOnly": "yarn test",
-    "flatten:factory": "truffle-flattener contracts/EasyBakeFactory.sol > flats//EasyBakeFactory_flat.sol "
+    "flatten:factory": "truffle-flattener contracts/EasyBakeFactory.sol > flats//EasyBakeFactory_flat.sol",
+    "flatten:pair": "truffle-flattener contracts/EasyBakePair.sol > flats//EasyBakePair_flat.sol"
+
   },
   "devDependencies": {
     "@types/chai": "^4.2.6",
