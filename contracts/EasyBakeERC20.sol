@@ -7,8 +7,8 @@ import './libraries/SafeMath.sol';
 contract EasyBakeERC20 {
     using SafeMath for uint;
 
-    string public constant name = 'DOUGH-LP';
-    string public constant symbol = 'DLP';
+    string public constant name = 'Easybake LP';
+    string public constant symbol = 'DOUGH-LP';
     uint8 public constant decimals = 18;
     uint  public totalSupply;
     mapping(address => uint) public balanceOf;
@@ -22,7 +22,7 @@ contract EasyBakeERC20 {
     event Approval(address indexed owner, address indexed spender, uint value);
     event Transfer(address indexed from, address indexed to, uint value);
 
-    constructor() public {
+    constructor() {
         uint chainId;
         assembly {
             chainId := chainid()
@@ -72,7 +72,7 @@ contract EasyBakeERC20 {
     }
 
     function transferFrom(address from, address to, uint value) external returns (bool) {
-        if (allowance[from][msg.sender] != uint(-1)) {
+        if (allowance[from][msg.sender] != type(uint128).max) {
             allowance[from][msg.sender] = allowance[from][msg.sender].sub(value);
         }
         _transfer(from, to, value);
