@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.12;
+pragma solidity >=0.5.16;
 
 import './EasyBakeERC20.sol';
 import './libraries/Math.sol';

@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.12;
+pragma solidity >=0.5.16;
 
 import './interfaces/IEasyBakeFactory.sol';
 import './EasyBakePair.sol';
 
 contract EasyBakeFactory is IEasyBakeFactory {
-    address public override feeTo;
-    address public override feeToSetter;
-    address public override migrator;
+    address public feeTo;
+    address public feeToSetter;
+    address public migrator;
 
-    mapping(address => mapping(address => address)) public override getPair;
-    address[] public override allPairs;
+    mapping(address => mapping(address => address)) public getPair;
+    address[] public allPairs;
 
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
 
@@ -19,7 +19,7 @@ contract EasyBakeFactory is IEasyBakeFactory {
         feeToSetter = _feeToSetter;
     }
 
-    function allPairsLength() external override view returns (uint) {
+    function allPairsLength() external view returns (uint) {
         return allPairs.length;
     }
 
@@ -27,7 +27,7 @@ contract EasyBakeFactory is IEasyBakeFactory {
         return keccak256(type(EasyBakePair).creationCode);
     }
 
-    function createPair(address tokenA, address tokenB) external override returns (address pair) {
+    function createPair(address tokenA, address tokenB) external returns (address pair) {
         require(tokenA != tokenB, 'EasyBake: IDENTICAL_ADDRESSES');
         (address token0, address token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
         require(token0 != address(0), 'EasyBake: ZERO_ADDRESS');
@@ -44,17 +44,17 @@ contract EasyBakeFactory is IEasyBakeFactory {
         emit PairCreated(token0, token1, pair, allPairs.length);
     }
 
-    function setFeeTo(address _feeTo) external override {
+    function setFeeTo(address _feeTo) external {
         require(msg.sender == feeToSetter, 'EasyBake: FORBIDDEN');
         feeTo = _feeTo;
     }
 
-    function setMigrator(address _migrator) external override {
+    function setMigrator(address _migrator) external {
         require(msg.sender == feeToSetter, 'EasyBake: FORBIDDEN');
         migrator = _migrator;
     }
 
-    function setFeeToSetter(address _feeToSetter) external override {
+    function setFeeToSetter(address _feeToSetter) external {
         require(msg.sender == feeToSetter, 'EasyBake: FORBIDDEN');
         feeToSetter = _feeToSetter;
     }

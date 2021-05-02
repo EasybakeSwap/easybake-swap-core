@@ -1,5 +1,3 @@
-// File: contracts/interfaces/IEasyBakeFactory.sol
-
 // SPDX-License-Identifier: MIT
 
 pragma solidity >=0.5.0;
@@ -24,8 +22,6 @@ interface IEasyBakeFactory {
 
 // File: contracts/libraries/SafeMath.sol
 
-// SPDX-License-Identifier: MIT
-
 pragma solidity >=0.5.16;
 
 // a library for performing overflow-safe math, courtesy of DappHub (https://github.com/dapphub/ds-math)
@@ -46,16 +42,13 @@ library SafeMath {
 
 // File: contracts/EasyBakeERC20.sol
 
-// SPDX-License-Identifier: MIT
-
-pragma solidity >=0.6.12;
-
+pragma solidity >=0.5.16;
 
 contract EasyBakeERC20 {
     using SafeMath for uint;
 
-    string public constant name = 'DOUGH-LP';
-    string public constant symbol = 'DLP';
+    string public constant name = 'Easybake LP';
+    string public constant symbol = 'DOUGH-LP';
     uint8 public constant decimals = 18;
     uint  public totalSupply;
     mapping(address => uint) public balanceOf;
@@ -125,7 +118,7 @@ contract EasyBakeERC20 {
         _transfer(from, to, value);
         return true;
     }
-
+    
     function permit(address owner, address spender, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s) external {
         require(deadline >= block.timestamp, 'EasyBake: EXPIRED');
         bytes32 digest = keccak256(
@@ -142,8 +135,6 @@ contract EasyBakeERC20 {
 }
 
 // File: contracts/libraries/Math.sol
-
-// SPDX-License-Identifier: MIT
 
 pragma solidity >=0.5.16;
 
@@ -171,8 +162,6 @@ library Math {
 
 // File: contracts/libraries/UQ112x112.sol
 
-// SPDX-License-Identifier: MIT
-
 pragma solidity >=0.5.16;
 
 // a library for handling binary fixed point numbers (https://en.wikipedia.org/wiki/Q_(number_format))
@@ -196,8 +185,6 @@ library UQ112x112 {
 
 // File: contracts/interfaces/IERC20.sol
 
-// SPDX-License-Identifier: MIT
-
 pragma solidity >=0.5.0;
 
 interface IERC20 {
@@ -218,8 +205,6 @@ interface IERC20 {
 
 // File: contracts/interfaces/IEasyBakeCallee.sol
 
-// SPDX-License-Identifier: MIT
-
 pragma solidity >=0.5.0;
 
 interface IEasyBakeCallee {
@@ -228,16 +213,7 @@ interface IEasyBakeCallee {
 
 // File: contracts/EasyBakePair.sol
 
-// SPDX-License-Identifier: MIT
-
-pragma solidity >=0.6.12;
-
-
-
-
-
-
-
+pragma solidity >=0.5.16;
 
 interface IMigrator {
     // Return the desired amount of liquidity token that the migrator wants.
@@ -445,19 +421,15 @@ contract EasyBakePair is EasyBakeERC20 {
 
 // File: contracts/EasyBakeFactory.sol
 
-// SPDX-License-Identifier: MIT
-
-pragma solidity >=0.6.12;
-
-
+pragma solidity >=0.5.16;
 
 contract EasyBakeFactory is IEasyBakeFactory {
-    address public override feeTo;
-    address public override feeToSetter;
-    address public override migrator;
+    address public feeTo;
+    address public feeToSetter;
+    address public migrator;
 
-    mapping(address => mapping(address => address)) public override getPair;
-    address[] public override allPairs;
+    mapping(address => mapping(address => address)) public getPair;
+    address[] public allPairs;
 
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
 
@@ -465,7 +437,7 @@ contract EasyBakeFactory is IEasyBakeFactory {
         feeToSetter = _feeToSetter;
     }
 
-    function allPairsLength() external override view returns (uint) {
+    function allPairsLength() external view returns (uint) {
         return allPairs.length;
     }
 
@@ -473,7 +445,7 @@ contract EasyBakeFactory is IEasyBakeFactory {
         return keccak256(type(EasyBakePair).creationCode);
     }
 
-    function createPair(address tokenA, address tokenB) external override returns (address pair) {
+    function createPair(address tokenA, address tokenB) external returns (address pair) {
         require(tokenA != tokenB, 'EasyBake: IDENTICAL_ADDRESSES');
         (address token0, address token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
         require(token0 != address(0), 'EasyBake: ZERO_ADDRESS');
@@ -490,17 +462,17 @@ contract EasyBakeFactory is IEasyBakeFactory {
         emit PairCreated(token0, token1, pair, allPairs.length);
     }
 
-    function setFeeTo(address _feeTo) external override {
+    function setFeeTo(address _feeTo) external {
         require(msg.sender == feeToSetter, 'EasyBake: FORBIDDEN');
         feeTo = _feeTo;
     }
 
-    function setMigrator(address _migrator) external override {
+    function setMigrator(address _migrator) external {
         require(msg.sender == feeToSetter, 'EasyBake: FORBIDDEN');
         migrator = _migrator;
     }
 
-    function setFeeToSetter(address _feeToSetter) external override {
+    function setFeeToSetter(address _feeToSetter) external {
         require(msg.sender == feeToSetter, 'EasyBake: FORBIDDEN');
         feeToSetter = _feeToSetter;
     }
